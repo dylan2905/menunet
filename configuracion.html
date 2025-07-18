@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menunet - Configuración</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" type="image/png" href="favicon.png" />
+</head>
+<body class="bg-gray-950 text-white font-sans">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-900 hidden md:flex flex-col p-4">
+      <h1 class="text-2xl font-bold mb-6">Menunet</h1>
+      <nav class="flex flex-col gap-4 text-gray-300">
+        <a href="index.html" class="hover:text-white">🏠 Dashboard</a>
+        <a href="pedidos.html" class="hover:text-white">📋 Pedidos</a>
+        <a href="menu.html" class="hover:text-white">🍽️ Menú</a>
+        <a href="reportes.html" class="hover:text-white">📈 Reportes</a>
+        <a href="configuracion.html" class="text-white font-bold">⚙️ Configuración</a>
+        <a href="admin.html" class="hover:text-white">🧑‍💼 Admin</a>
+      </nav>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="flex-1 p-6">
+      <h2 class="text-2xl font-bold mb-4">⚙️ Configuración</h2>
+      <p class="text-gray-400 mb-8">Personaliza las opciones de tu restaurante y gestión del sistema.</p>
+
+      <!-- Configuración de ejemplo -->
+      <div class="space-y-6">
+        <div class="bg-gray-800 p-4 rounded-xl shadow">
+          <h3 class="text-lg font-semibold mb-2">Nombre del Restaurante</h3>
+          <input type="text" class="w-full p-2 bg-gray-700 rounded" placeholder="Ej: Menunet Restaurante" />
+        </div>
+        <div class="bg-gray-800 p-4 rounded-xl shadow">
+          <h3 class="text-lg font-semibold mb-2">Zona Horaria</h3>
+          <select class="w-full p-2 bg-gray-700 rounded">
+            <option>GMT-5 (Colombia)</option>
+            <option>GMT-4</option>
+            <option>GMT-3</option>
+          </select>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer móvil -->
+  <footer class="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 text-gray-300 flex justify-around p-3 border-t border-gray-700">
+    <a href="index.html">🏠</a>
+    <a href="pedidos.html">📋</a>
+    <a href="menu.html">🍽️</a>
+    <a href="reportes.html">📈</a>
+    <a href="configuracion.html" class="text-white">⚙️</a>
+  </footer>
+</body>
+</html>

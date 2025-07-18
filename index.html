@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Menunet - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="favicon.png" />
+  </head>
+
+  <body class="bg-gray-950 text-white font-sans">
+    <div class="flex min-h-screen">
+      <!-- Sidebar -->
+      <aside class="w-64 bg-gray-900 hidden md:flex flex-col p-4">
+        <h1 class="text-2xl font-bold mb-6">Menunet</h1>
+        <nav class="flex flex-col gap-4 text-gray-300">
+        <a href="index.html" class="hover:text-white">🏠 Dashboard</a>
+        <a href="pedidos.html" class="hover:text-white">📋 Pedidos</a>
+        <a href="menu.html" class="text-white font-bold">🍽️ Menú</a>
+        <a href="reportes.html" class="hover:text-white">📈 Reportes</a>
+        <a href="configuracion.html" class="hover:text-white">⚙️ Configuración</a>
+        <a href="admin.html" class="hover:text-white">🧑‍💼 Admin</a>
+        </nav>
+      </aside>
+
+      <!-- Contenido principal -->
+      <main class="flex-1 p-4">
+        <!-- Encabezado -->
+        <header class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-semibold">Dashboard</h2>
+          <button class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded text-sm">
+            Cerrar sesión
+          </button>
+        </header>
+
+        <!-- Tarjetas resumen -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          <div class="bg-gray-800 p-4 rounded-xl shadow">
+            <p class="text-gray-400 text-sm">Pedidos hoy</p>
+            <h3 class="text-3xl font-bold mt-2">24</h3>
+          </div>
+          <div class="bg-gray-800 p-4 rounded-xl shadow">
+            <p class="text-gray-400 text-sm">Ingresos</p>
+            <h3 class="text-3xl font-bold mt-2">$385.000</h3>
+          </div>
+          <div class="bg-gray-800 p-4 rounded-xl shadow">
+            <p class="text-gray-400 text-sm">Mesas activas</p>
+            <h3 class="text-3xl font-bold mt-2">5</h3>
+          </div>
+        </section>
+
+        <!-- Contenido adicional -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Vista rápida del menú -->
+          <div class="bg-gray-800 p-4 rounded-xl">
+            <h4 class="text-lg font-semibold mb-4">Platos destacados</h4>
+            <ul class="space-y-2">
+              <li class="flex justify-between">
+                <span>Hamburguesa Doble</span>
+                <span>$24.000</span>
+              </li>
+              <li class="flex justify-between">
+                <span>Pizza 4 Quesos</span>
+                <span>$35.000</span>
+              </li>
+              <li class="flex justify-between">
+                <span>Lasaña de Pollo</span>
+                <span>$30.000</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Últimos pedidos -->
+          <div class="bg-gray-800 p-4 rounded-xl">
+            <h4 class="text-lg font-semibold mb-4">Últimos pedidos</h4>
+            <ul class="space-y-3 text-sm text-gray-300">
+              <li class="flex justify-between">
+                <span>#00124 - Mesa 5</span>
+                <span class="text-yellow-400">En cocina</span>
+              </li>
+              <li class="flex justify-between">
+                <span>#00125 - Mesa 2</span>
+                <span class="text-green-400">Servido</span>
+              </li>
+              <li class="flex justify-between">
+                <span>#00126 - Mesa 3</span>
+                <span class="text-gray-400">En espera</span>
+              </li>
+            </ul>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Footer fijo solo en móvil -->
+    <footer class="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 text-gray-300 flex justify-around p-3 border-t border-gray-700">
+      <a href="index.html" aria-label="Dashboard">🏠</a>
+      <a href="pedidos.html" aria-label="Pedidos">📋</a>
+      <a href="menu.html" aria-label="Menú">🍽️</a>
+      <a href="reportes.html" aria-label="Reportes">📈</a>
+      <a href="configuracion.html" aria-label="Configuración">⚙️</a>
+    </footer>
+  </body>
+</html>

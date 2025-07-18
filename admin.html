@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Menunet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="icon" href="favicon.png" type="image/png" />
+</head>
+<body class="bg-gray-950 text-white">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-900 hidden md:flex flex-col p-4">
+      <h1 class="text-2xl font-bold mb-6">Menunet</h1>
+      <nav class="flex flex-col gap-4 text-gray-300">
+        <a href="index.html" class="hover:text-white">🏠 Dashboard</a>
+        <a href="pedidos.html" class="hover:text-white">📋 Pedidos</a>
+        <a href="menu.html" class="hover:text-white">🍽️ Menú</a>
+        <a href="reportes.html" class="hover:text-white">📈 Reportes</a>
+        <a href="configuracion.html" class="hover:text-white">⚙️ Configuración</a>
+        <a href="admin.html" class="text-white font-bold">🧑‍💼 Admin</a>
+      </nav>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="flex-1 p-6 space-y-6">
+      <h2 class="text-2xl font-bold mb-2">🧑‍💼 Panel Administrativo</h2>
+
+      <!-- Estadísticas principales -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-gray-800 p-4 rounded-xl shadow">
+          <h3 class="text-lg font-semibold mb-1">Total ventas de hoy</h3>
+          <p class="text-3xl font-bold" id="ventas-dia">$0</p>
+        </div>
+        <div class="bg-gray-800 p-4 rounded-xl shadow">
+          <h3 class="text-lg font-semibold mb-1">Pedidos del día</h3>
+          <p class="text-3xl font-bold" id="pedidos-dia">0</p>
+        </div>
+        <div class="bg-gray-800 p-4 rounded-xl shadow">
+          <h3 class="text-lg font-semibold mb-1">Producto más vendido</h3>
+          <p class="text-xl" id="producto-mas-vendido">-</p>
+        </div>
+      </div>
+
+      <!-- Gráfica de ventas por hora -->
+      <div class="bg-gray-800 p-4 rounded-xl shadow">
+        <h3 class="text-lg font-semibold mb-4">Ventas por hora</h3>
+        <canvas id="graficaVentas"></canvas>
+      </div>
+
+      <!-- Filtro por estado -->
+      <div class="bg-gray-800 p-4 rounded-xl shadow">
+        <h3 class="text-lg font-semibold mb-2">Filtrar pedidos por estado</h3>
+        <select id="filtro-estado" class="text-black p-2 rounded">
+          <option value="todos">Todos</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="preparando">Preparando</option>
+          <option value="entregado">Entregado</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+        <ul id="lista-pedidos" class="mt-4 space-y-2"></ul>
+      </div>
+
+      <!-- Exportar e imprimir -->
+      <div class="flex flex-wrap gap-4">
+        <button onclick="exportarAExcel()" class="bg-green-600 px-4 py-2 rounded hover:bg-green-700">📥 Exportar a Excel</button>
+        <button onclick="window.print()" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">🖨️ Imprimir resumen</button>
+        <button onclick="generarPDF()" class="bg-red-600 px-4 py-2 rounded hover:bg-red-700">📄 Exportar a PDF</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer móvil -->
+  <footer class="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 text-gray-300 flex justify-around p-3 border-t border-gray-700">
+    <a href="index.html">🏠</a>
+    <a href="pedidos.html">📋</a>
+    <a href="menu.html">🍽️</a>
+    <a href="reportes.html">📈</a>
+    <a href="configuracion.html">⚙️</a>
+  </footer>
+
+  <!-- Firebase & lógica -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAumkx4CKgbJcdDcQ9eXzw8Ol5od8WMa5k",
+      authDomain: "menunet-46d2c.firebaseapp.com",
+      databaseURL: "https://menunet-46d2c-default-rtdb.firebaseio.com",
+      projectId: "menunet-46d2c",
+      storageBucket: "menunet-46d2c.appspot.com",
+      messagingSenderId: "27587490373",
+      appId: "1:27587490373:web:34b2afbb1ea3a341fa292c",
+      measurementId: "G-6N4ZSXGZ56"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let totalVentas = 0;
+    let totalPedidos = 0;
+    let conteoProductos = {};
+    let ventasPorHora = Array(24).fill(0);
+
+    db.ref("pedidos").on("value", snapshot => {
+      const pedidos = snapshot.val();
+      totalVentas = 0;
+      totalPedidos = 0;
+      conteoProductos = {};
+      ventasPorHora = Array(24).fill(0);
+      const lista = document.getElementById("lista-pedidos");
+      lista.innerHTML = "";
+      const hoy = new Date().toDateString();
+      for (const id in pedidos) {
+        const pedido = pedidos[id];
+        const fecha = new Date(pedido.timestamp).toDateString();
+        const hora = new Date(pedido.timestamp).getHours();
+        if (fecha === hoy) {
+          totalPedidos++;
+          totalVentas += pedido.total || 0;
+          ventasPorHora[hora] += pedido.total || 0;
+          pedido.productos?.forEach(p => {
+            conteoProductos[p.nombre] = (conteoProductos[p.nombre] || 0) + p.cantidad;
+          });
+        }
+
+        const estadoFiltro = document.getElementById("filtro-estado").value;
+        if (estadoFiltro === "todos" || pedido.estado === estadoFiltro) {
+          const li = document.createElement("li");
+          li.textContent = `Mesa ${pedido.mesa} - ${pedido.estado || "pendiente"} - $${pedido.total}`;
+          lista.appendChild(li);
+        }
+      }
+
+      document.getElementById("ventas-dia").textContent = totalVentas.toLocaleString("es-CO", { style: "currency", currency: "COP" });
+      document.getElementById("pedidos-dia").textContent = totalPedidos;
+      const productoMasVendido = Object.entries(conteoProductos).sort((a, b) => b[1] - a[1])[0];
+      document.getElementById("producto-mas-vendido").textContent = productoMasVendido ? `${productoMasVendido[0]} (${productoMasVendido[1]})` : "-";
+      graficar();
+    });
+
+    document.getElementById("filtro-estado").addEventListener("change", () => {
+      db.ref("pedidos").once("value").then(snapshot => {
+        const pedidos = snapshot.val();
+        const lista = document.getElementById("lista-pedidos");
+        lista.innerHTML = "";
+        for (const id in pedidos) {
+          const pedido = pedidos[id];
+          const estadoFiltro = document.getElementById("filtro-estado").value;
+          if (estadoFiltro === "todos" || pedido.estado === estadoFiltro) {
+            const li = document.createElement("li");
+            li.textContent = `Mesa ${pedido.mesa} - ${pedido.estado || "pendiente"} - $${pedido.total}`;
+            lista.appendChild(li);
+          }
+        }
+      });
+    });
+
+    function graficar() {
+      const ctx = document.getElementById("graficaVentas").getContext("2d");
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: [...Array(24).keys()].map(h => `${h}:00`),
+          datasets: [{
+            label: "Ventas por hora",
+            data: ventasPorHora,
+            backgroundColor: "#38bdf8"
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    function exportarAExcel() {
+      alert("Funcionalidad de exportación a Excel aún no implementada");
+    }
+
+    function generarPDF() {
+      alert("Funcionalidad de exportar a PDF aún no implementada");
+    }
+  </script>
+</body>
+</html>
