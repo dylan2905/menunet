@@ -2,13 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Menunet - Reportes</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="icon" href="favicon.png" type="image/png" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link rel="icon" href="favicon.png" />
 </head>
+
 <body class="bg-gray-950 text-white font-sans">
   <div class="flex min-h-screen">
     <!-- Sidebar -->
@@ -24,155 +23,80 @@
       </nav>
     </aside>
 
-    <!-- Contenido principal -->
-    <main class="flex-1 p-6" id="reporte">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold">📈 Reportes</h2>
-        <button onclick="exportarPDF()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-white text-sm">
-          Exportar a PDF
-        </button>
-      </div>
-      <p class="text-gray-400 mb-8">Estadísticas actualizadas de ventas y productos del restaurante.</p>
+    <!-- Main -->
+    <main class="flex-1 p-4">
+      <!-- Encabezado -->
+      <header class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-semibold">Reportes de Ventas</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded text-sm">Cerrar sesión</button>
+      </header>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div class="bg-gray-800 p-4 rounded-xl shadow">
-          <h3 class="text-lg font-semibold mb-2">Ventas por Día</h3>
-          <canvas id="graficoVentas"></canvas>
+      <!-- Filtros -->
+      <section class="bg-gray-800 p-4 rounded-xl mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm mb-1">Desde</label>
+          <input type="date" id="fechaDesde" class="w-full px-3 py-2 rounded bg-gray-700 text-white">
         </div>
-        <div class="bg-gray-800 p-4 rounded-xl shadow">
-          <h3 class="text-lg font-semibold mb-2">Productos Más Vendidos</h3>
-          <canvas id="graficoPlatos"></canvas>
+        <div>
+          <label class="block text-sm mb-1">Hasta</label>
+          <input type="date" id="fechaHasta" class="w-full px-3 py-2 rounded bg-gray-700 text-white">
         </div>
-      </div>
+        <div class="flex items-end">
+          <button onclick="filtrarReportes()" class="w-full bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded">Aplicar Filtro</button>
+        </div>
+      </section>
 
-      <!-- Tabla de productos más vendidos -->
-      <div class="bg-gray-800 p-4 rounded-xl shadow mb-12">
-        <h3 class="text-lg font-semibold mb-4">Resumen de Productos Más Vendidos</h3>
-        <div class="overflow-x-auto">
-          <table class="w-full table-auto text-left">
-            <thead class="text-gray-300">
-              <tr>
-                <th class="pb-2">Producto</th>
-                <th class="pb-2">Cantidad</th>
-              </tr>
-            </thead>
-            <tbody id="tablaProductos" class="text-white"></tbody>
-          </table>
+      <!-- Resumen -->
+      <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="bg-gray-800 p-4 rounded-xl shadow">
+          <p class="text-gray-400 text-sm">Total Ventas</p>
+          <h3 class="text-2xl font-bold mt-1" id="totalVentas">$0</h3>
         </div>
-      </div>
+        <div class="bg-gray-800 p-4 rounded-xl shadow">
+          <p class="text-gray-400 text-sm">Pedidos</p>
+          <h3 class="text-2xl font-bold mt-1" id="totalPedidos">0</h3>
+        </div>
+        <div class="bg-gray-800 p-4 rounded-xl shadow">
+          <p class="text-gray-400 text-sm">Promedio por pedido</p>
+          <h3 class="text-2xl font-bold mt-1" id="promedioVenta">$0</h3>
+        </div>
+      </section>
+
+      <!-- Tabla de pedidos -->
+      <section class="bg-gray-800 p-4 rounded-xl overflow-auto mb-8">
+        <h3 class="text-lg font-semibold mb-3">Pedidos registrados</h3>
+        <table class="w-full text-left text-sm text-gray-300">
+          <thead class="text-gray-400 border-b border-gray-700">
+            <tr>
+              <th class="py-2">ID</th>
+              <th>Mesa</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="tablaReportes" class="divide-y divide-gray-700"></tbody>
+        </table>
+      </section>
+
+      <!-- Gráfica (placeholder) -->
+      <section class="bg-gray-800 p-4 rounded-xl text-center">
+        <h3 class="text-lg font-semibold mb-3">Gráfica de Ventas</h3>
+        <div class="h-64 flex items-center justify-center text-gray-500">[Aquí irá la gráfica]</div>
+      </section>
     </main>
   </div>
 
   <!-- Footer móvil -->
   <footer class="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 text-gray-300 flex justify-around p-3 border-t border-gray-700">
-    <a href="index.html">🏠</a>
-    <a href="pedidos.html">📋</a>
-    <a href="menu.html">🍽️</a>
-    <a href="reportes.html" class="text-white">📈</a>
-    <a href="configuracion.html">⚙️</a>
+    <a href="index.html" aria-label="Dashboard">🏠</a>
+    <a href="pedidos.html" aria-label="Pedidos">📋</a>
+    <a href="menu.html" aria-label="Menú">🍽️</a>
+    <a href="reportes.html" aria-label="Reportes">📈</a>
+    <a href="configuracion.html" aria-label="Configuración">⚙️</a>
   </footer>
 
-  <!-- Firebase & JS -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAumkx4CKgbJcdDcQ9eXzw8Ol5od8WMa5k",
-      authDomain: "menunet-46d2c.firebaseapp.com",
-      databaseURL: "https://menunet-46d2c-default-rtdb.firebaseio.com",
-      projectId: "menunet-46d2c",
-      storageBucket: "menunet-46d2c.appspot.com",
-      messagingSenderId: "27587490373",
-      appId: "1:27587490373:web:34b2afbb1ea3a341fa292c",
-      measurementId: "G-6N4ZSXGZ56"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    // Obtener productos más vendidos
-    const tabla = document.getElementById("tablaProductos");
-    const productosRef = ref(db, "productos");
-
-    onValue(productosRef, (snapshot) => {
-      const data = snapshot.val();
-      if (!data) return;
-
-      tabla.innerHTML = "";
-      const labels = [];
-      const cantidades = [];
-
-      Object.keys(data).forEach((id) => {
-        const producto = data[id];
-        labels.push(producto.nombre);
-        cantidades.push(producto.cantidad || 0);
-
-        tabla.innerHTML += `
-          <tr>
-            <td class="py-1">${producto.nombre}</td>
-            <td class="py-1">${producto.cantidad || 0}</td>
-          </tr>
-        `;
-      });
-
-      // Actualizar gráfico de platos
-      new Chart(document.getElementById("graficoPlatos"), {
-        type: "bar",
-        data: {
-          labels: labels,
-          datasets: [{
-            label: "Cantidad Vendida",
-            data: cantidades,
-            backgroundColor: "#38bdf8"
-          }]
-        },
-        options: {
-          plugins: { legend: { display: false } },
-          scales: {
-            y: { beginAtZero: true }
-          }
-        }
-      });
-    });
-
-    // Gráfico de ventas por día (simulado)
-    const ctxVentas = document.getElementById("graficoVentas");
-    new Chart(ctxVentas, {
-      type: "line",
-      data: {
-        labels: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
-        datasets: [{
-          label: "Ventas ($)",
-          data: [200000, 300000, 150000, 400000, 320000, 500000, 600000],
-          borderColor: "#4ade80",
-          backgroundColor: "rgba(74,222,128,0.2)",
-          fill: true,
-          tension: 0.3
-        }]
-      },
-      options: {
-        plugins: {
-          legend: { display: false }
-        },
-        scales: {
-          y: { beginAtZero: true }
-        }
-      }
-    });
-
-    // Exportar a PDF
-    window.exportarPDF = () => {
-      const area = document.getElementById("reporte");
-      const opt = {
-        margin: 0.5,
-        filename: "reporte-menunet.pdf",
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
-      };
-      html2pdf().set(opt).from(area).save();
-    };
-  </script>
+  <!-- Firebase y JS -->
+  <script type="module" src="reportes.js"></script>
 </body>
 </html>

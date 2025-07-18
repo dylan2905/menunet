@@ -2,159 +2,42 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Menunet - Pedidos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pedidos - Menunet</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" href="favicon.png" />
 </head>
 <body class="bg-gray-950 text-white font-sans">
-  <div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-gray-900 hidden md:flex flex-col p-4">
-      <h1 class="text-2xl font-bold mb-6">Menunet</h1>
-      <nav class="flex flex-col gap-4 text-gray-300">
-        <a href="index.html" class="hover:text-white">🏠 Dashboard</a>
-        <a href="pedidos.html" class="text-white font-bold">📋 Pedidos</a>
-        <a href="menu.html" class="hover:text-white">🍽️ Menú</a>
-        <a href="reportes.html" class="hover:text-white">📈 Reportes</a>
-        <a href="configuracion.html" class="hover:text-white">⚙️ Configuración</a>
-        <a href="admin.html" class="hover:text-white">🧑‍💼 Admin</a>
-      </nav>
-    </aside>
+  <div class="p-4 max-w-6xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">📋 Pedidos</h1>
 
-    <!-- Contenido principal -->
-    <main class="flex-1 p-4">
-      <header class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-semibold">Pedidos Activos</h2>
-        <a href="nuevo.html" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded text-sm">+ Nuevo Pedido</a>
-      </header>
+    <!-- Filtros -->
+    <div class="flex flex-wrap gap-2 mb-4">
+      <button class="filter-btn bg-indigo-600 px-3 py-1 rounded" data-filter="todos">Todos</button>
+      <button class="filter-btn bg-gray-700 px-3 py-1 rounded" data-filter="espera">En espera</button>
+      <button class="filter-btn bg-yellow-500 px-3 py-1 rounded" data-filter="cocina">En cocina</button>
+      <button class="filter-btn bg-green-600 px-3 py-1 rounded" data-filter="servido">Servido</button>
+      <button class="filter-btn bg-red-600 px-3 py-1 rounded" data-filter="cancelado">Cancelado</button>
+    </div>
 
-      <section id="contenedor-pedidos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- Pedidos dinámicos -->
-      </section>
-    </main>
+    <!-- Lista de pedidos -->
+    <div id="pedidosContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
   </div>
 
-  <!-- Footer móvil -->
-  <footer class="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 text-gray-300 flex justify-around p-3 border-t border-gray-700">
-    <a href="index.html">📊</a>
-    <a href="menu.html">🍽️</a>
-    <a href="pedidos.html" class="text-white">📋</a>
-    <a href="configuracion.html">⚙️</a>
-  </footer>
-
-  <!-- Modal de Detalle -->
-  <div id="modal-detalle" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50">
-    <div class="bg-white text-black rounded-lg max-w-md w-full p-6 relative">
-      <button onclick="cerrarModal()" class="absolute top-2 right-3 text-xl font-bold text-gray-700">✖</button>
-      <h3 class="text-xl font-semibold mb-4">Detalles del Pedido</h3>
-      <div id="detalle-contenido" class="text-sm space-y-2"></div>
+  <!-- Modal de detalles -->
+  <div id="modal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50">
+    <div class="bg-white text-black w-full max-w-lg p-6 rounded-lg shadow-lg relative">
+      <button id="closeModal" class="absolute top-2 right-2 text-red-600 text-xl">&times;</button>
+      <h2 class="text-2xl font-bold mb-2">🧾 Detalles del Pedido</h2>
+      <div id="modalContent" class="text-sm"></div>
+      <div class="mt-4 flex gap-3">
+        <button id="entregarBtn" class="bg-green-600 text-white px-4 py-2 rounded">Marcar como entregado</button>
+        <button id="cancelarBtn" class="bg-red-600 text-white px-4 py-2 rounded">Cancelar pedido</button>
+      </div>
     </div>
   </div>
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAumkx4CKgbJcdDcQ9eXzw8Ol5od8WMa5k",
-      authDomain: "menunet-46d2c.firebaseapp.com",
-      databaseURL: "https://menunet-46d2c-default-rtdb.firebaseio.com",
-      projectId: "menunet-46d2c",
-      storageBucket: "menunet-46d2c.appspot.com",
-      messagingSenderId: "27587490373",
-      appId: "1:27587490373:web:34b2afbb1ea3a341fa292c"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const pedidosRef = ref(db, 'pedidos');
-    const contenedor = document.getElementById('contenedor-pedidos');
-
-    const formatearTiempo = (timestamp) => {
-      const diferencia = Date.now() - timestamp;
-      const minutos = Math.floor(diferencia / 60000);
-      return minutos < 1 ? '⏱ Justo ahora' : `⏱ Hace ${minutos} min${minutos === 1 ? '' : 's'}`;
-    };
-
-    const estadoClase = (estado) => {
-      switch (estado) {
-        case 'En preparación': return 'bg-yellow-500 text-black';
-        case 'Entregado': return 'bg-green-600';
-        case 'Cancelado': return 'bg-red-600';
-        default: return 'bg-gray-600';
-      }
-    };
-
-    onValue(pedidosRef, (snapshot) => {
-      const data = snapshot.val();
-      contenedor.innerHTML = '';
-
-      if (!data) {
-        contenedor.innerHTML = '<p class="text-gray-400">No hay pedidos aún.</p>';
-        return;
-      }
-
-      const pedidos = Object.entries(data).reverse();
-
-      pedidos.forEach(([id, pedido]) => {
-        if (pedido.estado === 'Cancelado') return;
-
-        const div = document.createElement('div');
-        div.className = 'bg-gray-800 rounded-xl p-4 shadow-md';
-        div.innerHTML = `
-          <div class="flex justify-between items-center mb-2">
-            <h3 class="font-semibold text-lg">Mesa ${pedido.mesa || 'N/A'}</h3>
-            <span class="text-sm ${estadoClase(pedido.estado)} px-2 py-0.5 rounded">${pedido.estado || 'Pendiente'}</span>
-          </div>
-          <p class="text-sm text-gray-400 mb-1">Total: $${pedido.total?.toLocaleString() || '0'}</p>
-          <p class="text-sm text-gray-500">${formatearTiempo(pedido.timestamp || Date.now())}</p>
-          <div class="mt-4 flex justify-end gap-3 flex-wrap">
-            <button class="text-yellow-400 text-sm" onclick="verPedido('${id}')">✏️ Ver</button>
-            <button class="text-green-400 text-sm" onclick="entregarPedido('${id}')">✅ Entregar</button>
-            <button class="text-red-500 text-sm" onclick="cancelarPedido('${id}')">🗑️ Cancelar</button>
-          </div>
-        `;
-        contenedor.appendChild(div);
-      });
-    });
-
-    window.verPedido = function(id) {
-      const modal = document.getElementById('modal-detalle');
-      const contenido = document.getElementById('detalle-contenido');
-      const pedidoRef = ref(db, `pedidos/${id}`);
-
-      onValue(pedidoRef, (snap) => {
-        const pedido = snap.val();
-        if (!pedido) return;
-        contenido.innerHTML = `
-          <p><strong>Mesa:</strong> ${pedido.mesa || 'N/A'}</p>
-          <p><strong>Estado:</strong> ${pedido.estado}</p>
-          <p><strong>Total:</strong> $${pedido.total?.toLocaleString() || '0'}</p>
-          <p><strong>Hora:</strong> ${new Date(pedido.timestamp).toLocaleString()}</p>
-          <p><strong>Productos:</strong></p>
-          <ul class="list-disc pl-5">${(pedido.productos || []).map(p => `<li>${p.nombre} x${p.cantidad}</li>`).join('')}</ul>
-        `;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-      }, { onlyOnce: true });
-    };
-
-    window.cerrarModal = () => {
-      document.getElementById('modal-detalle').classList.add('hidden');
-    };
-
-    window.cancelarPedido = (id) => {
-      if (confirm("¿Estás seguro de cancelar este pedido?")) {
-        const pedidoRef = ref(db, `pedidos/${id}`);
-        update(pedidoRef, { estado: "Cancelado" });
-      }
-    };
-
-    window.entregarPedido = (id) => {
-      const pedidoRef = ref(db, `pedidos/${id}`);
-      update(pedidoRef, { estado: "Entregado" });
-    };
-  </script>
+  <!-- Firebase + lógica -->
+  <script type="module" src="js/pedidos.js"></script>
 </body>
 </html>

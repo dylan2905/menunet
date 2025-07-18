@@ -27,21 +27,26 @@
       <h2 class="text-2xl font-bold mb-4">⚙️ Configuración</h2>
       <p class="text-gray-400 mb-8">Personaliza las opciones de tu restaurante y gestión del sistema.</p>
 
-      <!-- Configuración de ejemplo -->
-      <div class="space-y-6">
+      <!-- Formulario de configuración -->
+      <form class="space-y-6" id="configForm">
         <div class="bg-gray-800 p-4 rounded-xl shadow">
           <h3 class="text-lg font-semibold mb-2">Nombre del Restaurante</h3>
-          <input type="text" class="w-full p-2 bg-gray-700 rounded" placeholder="Ej: Menunet Restaurante" />
+          <input id="nombreRestaurante" type="text" class="w-full p-2 bg-gray-700 rounded" placeholder="Ej: Menunet Restaurante" />
         </div>
         <div class="bg-gray-800 p-4 rounded-xl shadow">
           <h3 class="text-lg font-semibold mb-2">Zona Horaria</h3>
-          <select class="w-full p-2 bg-gray-700 rounded">
-            <option>GMT-5 (Colombia)</option>
-            <option>GMT-4</option>
-            <option>GMT-3</option>
+          <select id="zonaHoraria" class="w-full p-2 bg-gray-700 rounded">
+            <option value="-5">GMT-5 (Colombia)</option>
+            <option value="-4">GMT-4</option>
+            <option value="-3">GMT-3</option>
           </select>
         </div>
-      </div>
+        <div class="flex justify-end">
+          <button type="submit" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-xl text-white font-semibold">
+            Guardar configuración
+          </button>
+        </div>
+      </form>
     </main>
   </div>
 
@@ -53,5 +58,19 @@
     <a href="reportes.html">📈</a>
     <a href="configuracion.html" class="text-white">⚙️</a>
   </footer>
+
+  <!-- Script para manejar el guardado -->
+  <script>
+    document.getElementById('configForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const nombre = document.getElementById('nombreRestaurante').value;
+      const zona = document.getElementById('zonaHoraria').value;
+
+      // Aquí podrías guardar en Firebase
+      alert('Configuración guardada:\nNombre: ' + nombre + '\nZona Horaria: GMT' + zona);
+
+      // TODO: Guardar en Firestore o localStorage si se desea persistencia.
+    });
+  </script>
 </body>
 </html>

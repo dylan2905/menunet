@@ -1,32 +1,34 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nuevo Pedido - Menunet</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
-
 <body class="bg-gray-950 text-white font-sans min-h-screen flex flex-col">
+
   <!-- Encabezado -->
   <header class="p-4 border-b border-gray-800 flex justify-between items-center">
     <h1 class="text-lg font-semibold">📋 Nuevo Pedido</h1>
     <a href="pedidos.html" class="text-sm text-gray-400 hover:text-white">← Volver</a>
   </header>
 
-  <!-- Seleccionar mesa -->
+  <!-- Selección de Mesa -->
   <section class="p-4">
     <h2 class="text-sm font-medium text-gray-400 mb-2">Selecciona la mesa:</h2>
     <div class="grid grid-cols-4 sm:grid-cols-6 gap-3" id="mesa-container"></div>
   </section>
 
-  <!-- Selección de productos -->
+  <!-- Productos -->
   <section class="p-4 flex-1 overflow-y-auto">
     <h2 class="text-sm font-medium text-gray-400 mb-2">Agrega productos:</h2>
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4" id="menu-container"></div>
   </section>
 
-  <!-- Resumen y acción -->
+  <!-- Resumen -->
   <footer class="p-4 border-t border-gray-800 bg-gray-900">
     <div class="flex justify-between items-center mb-2 text-sm">
       <span id="mesa-seleccionada">Mesa: —</span>
@@ -37,128 +39,7 @@
     </button>
   </footer>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
-  <script>
-    // Firebase Configuración
-    const firebaseConfig = {
-      apiKey: "AIzaSyAumkx4CKgbJcdDcQ9eXzw8Ol5od8WMa5k",
-      authDomain: "menunet-46d2c.firebaseapp.com",
-      databaseURL: "https://menunet-46d2c-default-rtdb.firebaseio.com",
-      projectId: "menunet-46d2c",
-      storageBucket: "menunet-46d2c.appspot.com",
-      messagingSenderId: "27587490373",
-      appId: "1:27587490373:web:34b2afbb1ea3a341fa292c",
-      measurementId: "G-6N4ZSXGZ56"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    const mesas = [1, 2, 3, 4, 5, 6];
-    const productos = [
-      { nombre: "Hamburguesa", precio: 18000 },
-      { nombre: "Pizza", precio: 28000 },
-      { nombre: "Jugo natural", precio: 6000 },
-      { nombre: "Papas fritas", precio: 8000 },
-      { nombre: "Ensalada", precio: 9500 },
-      { nombre: "Gaseosa", precio: 5000 },
-    ];
-
-    let mesaSeleccionada = null;
-    let pedido = [];
-
-    const mesaContainer = document.getElementById("mesa-container");
-    const menuContainer = document.getElementById("menu-container");
-    const totalSpan = document.getElementById("total");
-    const btnEnviar = document.getElementById("enviarBtn");
-    const mesaLabel = document.getElementById("mesa-seleccionada");
-
-    // Renderizar mesas
-    mesas.forEach((n) => {
-      const btn = document.createElement("button");
-      btn.textContent = "Mesa " + n;
-      btn.className =
-        "bg-gray-800 hover:bg-indigo-600 rounded-xl py-2 text-sm transition-all border border-transparent";
-      btn.onclick = () => {
-        mesaSeleccionada = n;
-        mesaLabel.textContent = "Mesa: " + n;
-
-        Array.from(mesaContainer.children).forEach((b) => {
-          b.classList.remove("bg-indigo-600", "border-white");
-          b.classList.add("bg-gray-800");
-        });
-
-        btn.classList.add("bg-indigo-600", "border-white");
-        btn.classList.remove("bg-gray-800");
-
-        validarBoton();
-      };
-      mesaContainer.appendChild(btn);
-    });
-
-    // Renderizar productos
-    productos.forEach((prod) => {
-      const btn = document.createElement("button");
-      btn.className =
-        "bg-gray-800 hover:bg-green-600 rounded-xl p-3 text-sm text-left transition-all";
-      btn.innerHTML = `
-        <span class="block font-medium">${prod.nombre}</span>
-        <span class="text-xs text-gray-400">$${prod.precio.toLocaleString()}</span>
-      `;
-      btn.onclick = () => {
-        pedido.push(prod);
-        actualizarTotal();
-        validarBoton();
-      };
-      menuContainer.appendChild(btn);
-    });
-
-    function actualizarTotal() {
-      const suma = pedido.reduce((acc, p) => acc + p.precio, 0);
-      totalSpan.textContent = "$" + suma.toLocaleString();
-    }
-
-    function validarBoton() {
-      btnEnviar.disabled = !(mesaSeleccionada && pedido.length > 0);
-    }
-
-    // Enviar pedido a Firebase
-    btnEnviar.onclick = () => {
-      if (!mesaSeleccionada || pedido.length === 0) {
-        alert("Debes seleccionar una mesa y al menos un producto.");
-        return;
-      }
-
-      const nuevoPedido = {
-        mesa: mesaSeleccionada,
-        productos: pedido,
-        total: pedido.reduce((acc, p) => acc + p.precio, 0),
-        estado: "pendiente",
-        timestamp: Date.now()
-      };
-
-      db.ref("pedidos").push(nuevoPedido)
-        .then(() => {
-          alert("✅ Pedido enviado a cocina");
-
-          // Reset
-          pedido.length = 0;
-          mesaSeleccionada = null;
-          actualizarTotal();
-          mesaLabel.textContent = "Mesa: —";
-          validarBoton();
-          Array.from(mesaContainer.children).forEach((b) =>
-            b.classList.remove("bg-indigo-600", "border-white")
-          );
-        })
-        .catch((error) => {
-          console.error("Error al enviar pedido:", error);
-          alert("❌ Hubo un error al enviar el pedido");
-        });
-    };
-  </script>
+  <!-- Script externo -->
+  <script type="module" src="nuevo-pedido.js"></script>
 </body>
 </html>
